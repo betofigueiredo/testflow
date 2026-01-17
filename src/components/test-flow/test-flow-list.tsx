@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Plus, FlaskConical } from 'lucide-react';
+import { Plus, FlaskConical, Download } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,7 @@ export function TestFlowList() {
     updateStepResult,
     addRunNote,
     deleteRun,
+    exportFlows,
   } = useTestFlows();
 
   const [isCreating, setIsCreating] = React.useState(false);
@@ -53,10 +54,18 @@ export function TestFlowList() {
           Test Flows
         </h1>
         {!isCreating && (
-          <Button onClick={() => setIsCreating(true)}>
-            <Plus data-icon="inline-start" />
-            New Flow
-          </Button>
+          <div className="flex gap-2">
+            {flows.length > 0 && (
+              <Button variant="outline" onClick={exportFlows}>
+                <Download data-icon="inline-start" />
+                Export
+              </Button>
+            )}
+            <Button onClick={() => setIsCreating(true)}>
+              <Plus data-icon="inline-start" />
+              New Flow
+            </Button>
+          </div>
         )}
       </div>
 

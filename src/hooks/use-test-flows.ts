@@ -284,6 +284,28 @@ export function useTestFlows() {
     );
   }, []);
 
+  const exportFlows = useCallback(() => {
+    const exportData = flows.map((flow) => ({
+      id: flow.id,
+      title: flow.title,
+      steps: flow.steps,
+      lastRun: flow.runs.length > 0 ? flow.runs[flow.runs.length - 1] : null,
+      createdAt: flow.createdAt,
+      updatedAt: flow.updatedAt,
+    }));
+
+    const json = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `testflow-export-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, [flows]);
+
   return {
     flows,
     isLoaded,
@@ -298,5 +320,6 @@ export function useTestFlows() {
     updateStepResult,
     addRunNote,
     deleteRun,
+    exportFlows,
   };
 }
