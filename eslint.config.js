@@ -20,7 +20,7 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
-      quotes: [2, 'single'],
+      quotes: [2, 'single', { avoidEscape: true }],
     },
   },
 ]);
