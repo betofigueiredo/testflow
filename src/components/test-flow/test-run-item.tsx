@@ -1,9 +1,9 @@
-import * as React from 'react'
-import { CheckCircle2, XCircle, Clock, Trash2, Play } from 'lucide-react'
+import * as React from 'react';
+import { CheckCircle2, XCircle, Clock, Trash2, Play } from 'lucide-react';
 
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,25 +14,37 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import type { TestRun, TestStep } from '@/types/test-flow'
+} from '@/components/ui/alert-dialog';
+import type { TestRun, TestStep } from '@/types/test-flow';
 
 interface TestRunItemProps {
-  run: TestRun
-  runNumber: number
-  steps: TestStep[]
-  onDelete: () => void
-  onContinue: () => void
+  run: TestRun;
+  runNumber: number;
+  steps: TestStep[];
+  onDelete: () => void;
+  onContinue: () => void;
 }
 
-export function TestRunItem({ run, runNumber, steps, onDelete, onContinue }: TestRunItemProps) {
-  const passedCount = run.stepResults.filter((r) => r.status === 'passed').length
-  const failedCount = run.stepResults.filter((r) => r.status === 'failed').length
-  const pendingCount = run.stepResults.filter((r) => r.status === 'pending').length
+export function TestRunItem({
+  run,
+  runNumber,
+  steps,
+  onDelete,
+  onContinue,
+}: TestRunItemProps) {
+  const passedCount = run.stepResults.filter(
+    (r) => r.status === 'passed',
+  ).length;
+  const failedCount = run.stepResults.filter(
+    (r) => r.status === 'failed',
+  ).length;
+  const pendingCount = run.stepResults.filter(
+    (r) => r.status === 'pending',
+  ).length;
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString()
-  }
+    return new Date(dateStr).toLocaleString();
+  };
 
   return (
     <div
@@ -44,9 +56,13 @@ export function TestRunItem({ run, runNumber, steps, onDelete, onContinue }: Tes
       )}
     >
       <div className="flex items-center gap-2">
-        {run.status === 'passed' && <CheckCircle2 className="size-5 text-green-500" />}
+        {run.status === 'passed' && (
+          <CheckCircle2 className="size-5 text-green-500" />
+        )}
         {run.status === 'failed' && <XCircle className="size-5 text-red-500" />}
-        {run.status === 'in_progress' && <Clock className="size-5 text-yellow-500" />}
+        {run.status === 'in_progress' && (
+          <Clock className="size-5 text-yellow-500" />
+        )}
       </div>
 
       <div className="flex-1">
@@ -54,11 +70,16 @@ export function TestRunItem({ run, runNumber, steps, onDelete, onContinue }: Tes
           <span className="text-sm font-medium">Run #{runNumber}</span>
           <Badge
             variant={
+              run.status === 'failed'
+                ? 'destructive'
+                : run.status === 'in_progress'
+                  ? 'secondary'
+                  : 'outline'
+            }
+            className={
               run.status === 'passed'
-                ? 'default'
-                : run.status === 'failed'
-                  ? 'destructive'
-                  : 'secondary'
+                ? 'border-green-500 bg-green-500/10 text-green-600'
+                : undefined
             }
           >
             {run.status === 'in_progress' ? 'In Progress' : run.status}
@@ -66,7 +87,9 @@ export function TestRunItem({ run, runNumber, steps, onDelete, onContinue }: Tes
         </div>
         <div className="text-muted-foreground mt-1 flex items-center gap-3 text-xs">
           <span>Started: {formatDate(run.createdAt)}</span>
-          {run.completedAt && <span>Completed: {formatDate(run.completedAt)}</span>}
+          {run.completedAt && (
+            <span>Completed: {formatDate(run.completedAt)}</span>
+          )}
         </div>
         <div className="text-muted-foreground mt-1 flex items-center gap-2 text-xs">
           <span className="text-green-600">{passedCount} passed</span>
@@ -118,5 +141,5 @@ export function TestRunItem({ run, runNumber, steps, onDelete, onContinue }: Tes
         </AlertDialog>
       </div>
     </div>
-  )
+  );
 }

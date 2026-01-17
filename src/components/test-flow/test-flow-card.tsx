@@ -23,6 +23,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -87,6 +88,8 @@ export function TestFlowCard({
   const activeRun = activeRunId
     ? flow.runs.find((r) => r.id === activeRunId)
     : null;
+
+  const lastRun = flow.runs.length > 0 ? flow.runs[flow.runs.length - 1] : null;
 
   const handleStartRun = () => {
     const newRun = onStartRun();
@@ -162,6 +165,26 @@ export function TestFlowCard({
                 )}
               </button>
               {flow.title}
+              {lastRun && (
+                <Badge
+                  variant={
+                    lastRun.status === 'failed'
+                      ? 'destructive'
+                      : lastRun.status === 'in_progress'
+                        ? 'secondary'
+                        : 'outline'
+                  }
+                  className={
+                    lastRun.status === 'passed'
+                      ? 'border-green-500 bg-green-500/10 text-green-600'
+                      : undefined
+                  }
+                >
+                  {lastRun.status === 'in_progress'
+                    ? 'In Progress'
+                    : lastRun.status}
+                </Badge>
+              )}
             </CardTitle>
             <CardDescription>
               {flow.steps.length} step{flow.steps.length !== 1 ? 's' : ''} ·{' '}
