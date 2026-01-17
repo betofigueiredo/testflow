@@ -1,8 +1,14 @@
 import * as React from 'react';
-import { Plus, FlaskConical, Download } from 'lucide-react';
+import { Plus, FlaskConical, Download, FileJson, FileText } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 import { TestFlowCard } from './test-flow-card';
 import { useTestFlows } from '@/hooks/use-test-flows';
 
@@ -20,7 +26,8 @@ export function TestFlowList() {
     updateStepResult,
     addRunNote,
     deleteRun,
-    exportFlows,
+    exportFlowsJson,
+    exportFlowsText,
   } = useTestFlows();
 
   const [isCreating, setIsCreating] = React.useState(false);
@@ -56,10 +63,22 @@ export function TestFlowList() {
         {!isCreating && (
           <div className="flex gap-2">
             {flows.length > 0 && (
-              <Button variant="outline" onClick={exportFlows}>
-                <Download data-icon="inline-start" />
-                Export
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger render={<Button variant="outline" />}>
+                  <Download data-icon="inline-start" />
+                  Export
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={exportFlowsJson}>
+                    <FileJson />
+                    Export as JSON
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportFlowsText}>
+                    <FileText />
+                    Export as Text
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
             <Button onClick={() => setIsCreating(true)}>
               <Plus data-icon="inline-start" />

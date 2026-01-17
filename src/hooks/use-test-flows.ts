@@ -284,7 +284,7 @@ export function useTestFlows() {
     );
   }, []);
 
-  const exportFlows = useCallback(() => {
+  const exportFlowsJson = useCallback(() => {
     const exportData = flows.map((flow) => ({
       id: flow.id,
       title: flow.title,
@@ -306,6 +306,27 @@ export function useTestFlows() {
     URL.revokeObjectURL(url);
   }, [flows]);
 
+  const exportFlowsText = useCallback(() => {
+    const text = flows
+      .map((flow) => {
+        const steps = flow.steps
+          .map((step, index) => `${index + 1}. ${step.description}`)
+          .join('\n');
+        return `${flow.title}\n${steps}`;
+      })
+      .join('\n\n');
+
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `testflow-export-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, [flows]);
+
   return {
     flows,
     isLoaded,
@@ -320,6 +341,7 @@ export function useTestFlows() {
     updateStepResult,
     addRunNote,
     deleteRun,
-    exportFlows,
+    exportFlowsJson,
+    exportFlowsText,
   };
 }
