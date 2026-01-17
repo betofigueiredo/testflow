@@ -1,7 +1,7 @@
-import { ComponentExample } from '@/components/component-example';
+import { TestFlowList } from '@/components/test-flow';
 
 function App() {
-  return <ComponentExample />;
+  return <TestFlowList />;
 }
 
 export default App;
