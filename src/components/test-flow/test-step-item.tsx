@@ -1,46 +1,47 @@
-import * as React from 'react'
-import { GripVertical, Pencil, Trash2, X, Check } from 'lucide-react'
+import * as React from 'react';
+import { GripVertical, Pencil, Trash2, X, Check } from 'lucide-react';
 
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import type { TestStep } from '@/types/test-flow'
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import type { TestStep } from '@/types/test-flow';
 
 interface TestStepItemProps {
-  step: TestStep
-  index: number
-  onUpdate: (updates: Partial<Omit<TestStep, 'id'>>) => void
-  onDelete: () => void
+  step: TestStep;
+  index: number;
+  onUpdate: (updates: Partial<Omit<TestStep, 'id'>>) => void;
+  onDelete: () => void;
 }
 
-export function TestStepItem({ step, index, onUpdate, onDelete }: TestStepItemProps) {
-  const [isEditing, setIsEditing] = React.useState(false)
-  const [description, setDescription] = React.useState(step.description)
-  const [expectedResult, setExpectedResult] = React.useState(step.expectedResult ?? '')
+export function TestStepItem({
+  step,
+  index,
+  onUpdate,
+  onDelete,
+}: TestStepItemProps) {
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [description, setDescription] = React.useState(step.description);
 
   const handleSave = () => {
-    if (!description.trim()) return
+    if (!description.trim()) return;
     onUpdate({
       description: description.trim(),
-      expectedResult: expectedResult.trim() || undefined,
-    })
-    setIsEditing(false)
-  }
+    });
+    setIsEditing(false);
+  };
 
   const handleCancel = () => {
-    setDescription(step.description)
-    setExpectedResult(step.expectedResult ?? '')
-    setIsEditing(false)
-  }
+    setDescription(step.description);
+    setIsEditing(false);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && e.metaKey) {
-      handleSave()
+    if (e.key === 'Enter') {
+      handleSave();
     } else if (e.key === 'Escape') {
-      handleCancel()
+      handleCancel();
     }
-  }
+  };
 
   if (isEditing) {
     return (
@@ -57,15 +58,6 @@ export function TestStepItem({ step, index, onUpdate, onDelete }: TestStepItemPr
             autoFocus
           />
         </div>
-        <div className="flex items-start gap-2 pl-8">
-          <Textarea
-            value={expectedResult}
-            onChange={(e) => setExpectedResult(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Expected result (optional)"
-            className="min-h-12"
-          />
-        </div>
         <div className="flex justify-end gap-1 pl-8">
           <Button variant="ghost" size="xs" onClick={handleCancel}>
             <X data-icon="inline-start" />
@@ -77,13 +69,13 @@ export function TestStepItem({ step, index, onUpdate, onDelete }: TestStepItemPr
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div
       className={cn(
-        'border-border hover:bg-muted/30 group flex items-start gap-2 border p-3 transition-colors'
+        'border-border hover:bg-muted/30 group flex items-start gap-2 border p-3 transition-colors',
       )}
     >
       <button
@@ -98,11 +90,6 @@ export function TestStepItem({ step, index, onUpdate, onDelete }: TestStepItemPr
       </span>
       <div className="flex-1">
         <p className="text-sm">{step.description}</p>
-        {step.expectedResult && (
-          <p className="text-muted-foreground mt-1 text-xs">
-            Expected: {step.expectedResult}
-          </p>
-        )}
       </div>
       <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         <Button
@@ -124,5 +111,5 @@ export function TestStepItem({ step, index, onUpdate, onDelete }: TestStepItemPr
         </Button>
       </div>
     </div>
-  )
+  );
 }

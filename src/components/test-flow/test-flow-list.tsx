@@ -1,10 +1,10 @@
-import * as React from 'react'
-import { Plus, FlaskConical } from 'lucide-react'
+import * as React from 'react';
+import { Plus, FlaskConical } from 'lucide-react';
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { TestFlowCard } from './test-flow-card'
-import { useTestFlows } from '@/hooks/use-test-flows'
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { TestFlowCard } from './test-flow-card';
+import { useTestFlows } from '@/hooks/use-test-flows';
 
 export function TestFlowList() {
   const {
@@ -16,29 +16,33 @@ export function TestFlowList() {
     addStep,
     updateStep,
     deleteStep,
-  } = useTestFlows()
+    startRun,
+    updateStepResult,
+    addRunNote,
+    deleteRun,
+  } = useTestFlows();
 
-  const [isCreating, setIsCreating] = React.useState(false)
-  const [newFlowTitle, setNewFlowTitle] = React.useState('')
+  const [isCreating, setIsCreating] = React.useState(false);
+  const [newFlowTitle, setNewFlowTitle] = React.useState('');
 
   const handleCreateFlow = () => {
-    if (!newFlowTitle.trim()) return
-    createFlow(newFlowTitle.trim())
-    setNewFlowTitle('')
-    setIsCreating(false)
-  }
+    if (!newFlowTitle.trim()) return;
+    createFlow(newFlowTitle.trim());
+    setNewFlowTitle('');
+    setIsCreating(false);
+  };
 
   const handleCancelCreate = () => {
-    setNewFlowTitle('')
-    setIsCreating(false)
-  }
+    setNewFlowTitle('');
+    setIsCreating(false);
+  };
 
   if (!isLoaded) {
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-muted-foreground text-sm">Loading...</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -62,8 +66,8 @@ export function TestFlowList() {
             value={newFlowTitle}
             onChange={(e) => setNewFlowTitle(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') handleCreateFlow()
-              if (e.key === 'Escape') handleCancelCreate()
+              if (e.key === 'Enter') handleCreateFlow();
+              if (e.key === 'Escape') handleCancelCreate();
             }}
             placeholder="Enter test flow title..."
             autoFocus
@@ -72,7 +76,11 @@ export function TestFlowList() {
           <Button variant="ghost" size="sm" onClick={handleCancelCreate}>
             Cancel
           </Button>
-          <Button size="sm" onClick={handleCreateFlow} disabled={!newFlowTitle.trim()}>
+          <Button
+            size="sm"
+            onClick={handleCreateFlow}
+            disabled={!newFlowTitle.trim()}
+          >
             Create
           </Button>
         </div>
@@ -100,15 +108,21 @@ export function TestFlowList() {
               flow={flow}
               onUpdateTitle={(title) => updateFlow(flow.id, { title })}
               onDelete={() => deleteFlow(flow.id)}
-              onAddStep={(description, expectedResult) =>
-                addStep(flow.id, description, expectedResult)
+              onAddStep={(description) => addStep(flow.id, description)}
+              onUpdateStep={(stepId, updates) =>
+                updateStep(flow.id, stepId, updates)
               }
-              onUpdateStep={(stepId, updates) => updateStep(flow.id, stepId, updates)}
               onDeleteStep={(stepId) => deleteStep(flow.id, stepId)}
+              onStartRun={() => startRun(flow.id)}
+              onUpdateStepResult={(runId, stepId, status) =>
+                updateStepResult(flow.id, runId, stepId, status)
+              }
+              onAddRunNote={(runId, note) => addRunNote(flow.id, runId, note)}
+              onDeleteRun={(runId) => deleteRun(flow.id, runId)}
             />
           ))}
         </div>
       )}
     </div>
-  )
+  );
 }

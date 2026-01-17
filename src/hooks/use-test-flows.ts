@@ -1,7 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { TestFlow, TestStep } from '@/types/test-flow';
+import type {
+  TestFlow,
+  TestStep,
+  TestRun,
+  StepResultStatus,
+} from '@/types/test-flow';
 
 const STORAGE_KEY = 'testflow-data';
+const MAX_RUNS_PER_FLOW = 5;
 
 function generateId(): string {
   return crypto.randomUUID();
@@ -10,7 +16,13 @@ function generateId(): string {
 function loadFromStorage(): TestFlow[] {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    const flows = JSON.parse(data) as TestFlow[];
+    // Ensure backward compatibility: add runs array if missing
+    return flows.map((flow) => ({
+      ...flow,
+      runs: flow.runs ?? [],
+    }));
   } catch {
     return [];
   }
@@ -41,6 +53,7 @@ export function useTestFlows() {
       id: generateId(),
       title,
       steps: [],
+      runs: [],
       createdAt: now,
       updatedAt: now,
     };
@@ -66,15 +79,10 @@ export function useTestFlows() {
   }, []);
 
   const addStep = useCallback(
-    (
-      flowId: string,
-      description: string,
-      expectedResult?: string,
-    ): TestStep => {
+    (flowId: string, description: string): TestStep => {
       const newStep: TestStep = {
         id: generateId(),
         description,
-        expectedResult,
       };
       setFlows((prev) =>
         prev.map((flow) =>
@@ -148,6 +156,134 @@ export function useTestFlows() {
     [],
   );
 
+  const startRun = useCallback(
+    (flowId: string): TestRun | null => {
+      const flow = flows.find((f) => f.id === flowId);
+      if (!flow || flow.steps.length === 0) return null;
+
+      const newRun: TestRun = {
+        id: generateId(),
+        flowId,
+        status: 'in_progress',
+        stepResults: flow.steps.map((step) => ({
+          stepId: step.id,
+          status: 'pending' as StepResultStatus,
+        })),
+        createdAt: new Date().toISOString(),
+      };
+
+      setFlows((prev) =>
+        prev.map((f) => {
+          if (f.id !== flowId) return f;
+          // Add new run and keep only the last MAX_RUNS_PER_FLOW runs
+          const updatedRuns = [...f.runs, newRun].slice(-MAX_RUNS_PER_FLOW);
+          return {
+            ...f,
+            runs: updatedRuns,
+            updatedAt: new Date().toISOString(),
+          };
+        }),
+      );
+
+      return newRun;
+    },
+    [flows],
+  );
+
+  const updateStepResult = useCallback(
+    (
+      flowId: string,
+      runId: string,
+      stepId: string,
+      status: StepResultStatus,
+    ) => {
+      setFlows((prev) =>
+        prev.map((flow) => {
+          if (flow.id !== flowId) return flow;
+
+          const updatedRuns = flow.runs.map((run) => {
+            if (run.id !== runId) return run;
+
+            const updatedStepResults = run.stepResults.map((result) =>
+              result.stepId === stepId ? { ...result, status } : result,
+            );
+
+            // If any step fails, mark the run as failed immediately
+            if (status === 'failed') {
+              return {
+                ...run,
+                stepResults: updatedStepResults,
+                status: 'failed',
+                completedAt: new Date().toISOString(),
+              } as TestRun;
+            }
+
+            // Check if all steps are completed and determine run status
+            const allCompleted = updatedStepResults.every(
+              (r) => r.status !== 'pending',
+            );
+
+            if (allCompleted) {
+              return {
+                ...run,
+                stepResults: updatedStepResults,
+                status: 'passed',
+                completedAt: new Date().toISOString(),
+              } as TestRun;
+            }
+
+            return {
+              ...run,
+              stepResults: updatedStepResults,
+            };
+          });
+
+          return {
+            ...flow,
+            runs: updatedRuns,
+            updatedAt: new Date().toISOString(),
+          };
+        }),
+      );
+    },
+    [],
+  );
+
+  const addRunNote = useCallback(
+    (flowId: string, runId: string, note: string) => {
+      setFlows((prev) =>
+        prev.map((flow) => {
+          if (flow.id !== flowId) return flow;
+
+          const updatedRuns = flow.runs.map((run) =>
+            run.id === runId ? { ...run, note } : run,
+          );
+
+          return {
+            ...flow,
+            runs: updatedRuns,
+            updatedAt: new Date().toISOString(),
+          };
+        }),
+      );
+    },
+    [],
+  );
+
+  const deleteRun = useCallback((flowId: string, runId: string) => {
+    setFlows((prev) =>
+      prev.map((flow) =>
+        flow.id === flowId
+          ? {
+              ...flow,
+              runs: flow.runs.filter((run) => run.id !== runId),
+              updatedAt: new Date().toISOString(),
+            }
+          : flow,
+      ),
+    );
+  }, []);
+
   return {
     flows,
     isLoaded,
@@ -158,5 +294,9 @@ export function useTestFlows() {
     updateStep,
     deleteStep,
     reorderSteps,
+    startRun,
+    updateStepResult,
+    addRunNote,
+    deleteRun,
   };
 }
